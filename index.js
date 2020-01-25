@@ -28,46 +28,56 @@ class UserAvatar extends React.PureComponent {
       src,
       name,
       color,
-      textColor = '#fff',
+      textColor = '#738ab7',
       colors = defaultColors,
-      size = 32,
+      fontDecrease,
+      size,
       containerStyle,
       imageStyle,
       defaultName,
-      borderRadius
+      radius = 0.5
     } = this.props;
+
+    if (!fontDecrease) fontDecrease = 3.5;
+
     if (!name) throw new Error('Avatar requires a name');
-    if (typeof size !== 'number') size = parseInt(size);
+
+    if(typeof size !== 'number') size = parseInt(size);
+
     let abbr = initials(name);
-    if (name.startsWith('+')) {
-      abbr = `+${abbr}`;
-    }
     if(!abbr) abbr = defaultName;
-    if (isNaN(borderRadius)) {
-      borderRadius = size * 0.5;
-    }
+
+    if(isNaN(radius)) radius = 0.5
+
+    const borderRadius = size * radius;
+
     const imageLocalStyle = {
       borderRadius
     };
-    const localStyle = {
+
+    const innerStyle = {
       borderRadius,
       borderWidth: 1,
       borderColor: 'transparent',
       justifyContent: 'center',
-      alignItems: 'center',
+      alignItems: 'center'
     };
-    let colorStyle = {};
+
+    if (size) {
+      imageLocalStyle.width = innerStyle.width = size;
+      imageLocalStyle.height = innerStyle.height = size;
+    }
+
     let inner;
     if (src) {
-      const sizeStyle = {
-        width: size,
-        height: size,
-      };
+
       const props = {
-        style: [imageLocalStyle, sizeStyle, imageStyle],
-        source: { uri: src }
-      };
-      inner = React.createElement(this.props.component || Image, props);
+        style: [imageLocalStyle, imageStyle],
+        source: {uri: src}
+      }
+
+      inner = React.createElement( this.props.component || Image, props )
+
     } else {
       let background;
       if (color) {
@@ -77,34 +87,19 @@ class UserAvatar extends React.PureComponent {
         let i = sumChars(name) % colors.length;
         background = colors[i];
       }
-      colorStyle = { backgroundColor: background };
-      const textContainerStyle = {
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      };
-      // TODO if i set this style to height instead of minHeight, react-native black screens, wtf
-      const minSizeStyle = {
-        minHeight: size,
-        minWidth: size,
-      };
-      inner = (
-        <View style={[textContainerStyle, minSizeStyle]}>
-          <Text
-            style={{
-              color: textColor,
-            }}
-            adjustsFontSizeToFit={true}
-            maxFontSizeMultiplier={1}
-          >
-            {abbr}
-          </Text>
-        </View>
-      );
+
+      innerStyle.backgroundColor = background;
+
+      inner = <Text style={{ fontSize: size / fontDecrease, color: textColor }}>{abbr}</Text>
     }
+
     return (
-      <View style={[localStyle, colorStyle, containerStyle]}>{inner}</View>
-    );
+      <View>
+        <View style={[innerStyle, containerStyle]}>
+          {inner}
+        </View>
+      </View>
+    )
   }
 }
 
